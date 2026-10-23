@@ -1,16 +1,24 @@
-import axios from "axios"
 import { useState } from "react"
+import { useDispatch } from "react-redux"
+import { addUser } from "../utils/userSlice"
+import { useNavigate } from "react-router-dom"
+import { apiCall } from "../utils/api"
 
 export const Login = () => {
     const [emailId, setEmailId] = useState("aditya@example.com")
     const [password, setPassword] = useState("Password123@")
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const [error, setError] = useState("");
 
     async function handleLogin(): Promise<void> {
         try {
-            const res = await axios.post("http://localhost:3000/auth/signin", { emailId, password }, { withCredentials: true })
-            console.log("res", res.data)
+            const res = await apiCall("/auth/signin", 'POST', { emailId, password });
+            dispatch(addUser(res.data.data));
+            navigate('/');
         } catch (error) {
-            console.log("error", error)
+            console.error(error);
+            setError(error.response.data.message || 'Some error occured');
         }
     }
 
@@ -31,6 +39,7 @@ export const Login = () => {
                                 value={password} onChange={(e) => setPassword(e.target.value)} />
                         </fieldset>
                     </div>
+                    <p className="text-red-500">{error}</p>
                     <div className="card-actions justify-end">
                         <button className="btn btn-primary" onClick={handleLogin}>Login</button>
                         <button className="btn btn-ghost">Register</button>
