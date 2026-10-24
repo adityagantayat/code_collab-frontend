@@ -1,12 +1,13 @@
-import { useState } from "react"
-import { useDispatch } from "react-redux"
-import { addUser } from "../utils/userSlice"
-import { useNavigate } from "react-router-dom"
-import { apiCall } from "../utils/api"
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { addUser } from "../utils/userSlice";
+import { useNavigate } from "react-router-dom";
+import { apiCall } from "../utils/api";
+import axios from "axios";
 
 export const Login = () => {
-    const [emailId, setEmailId] = useState("aditya@example.com")
-    const [password, setPassword] = useState("Password123@")
+    const [emailId, setEmailId] = useState("aditya@example.com");
+    const [password, setPassword] = useState("Password123@");
     const [isLoginForm, setIsLoginForm] = useState(false);
     const [firstName, setFirstName] = useState('');
     const [lastName, setLastName] = useState('');
@@ -24,127 +25,255 @@ export const Login = () => {
             const res = await apiCall("/auth/signin", 'POST', { emailId, password });
             dispatch(addUser(res.data.data));
             navigate('/');
-        } catch (error) {
-            console.error(error);
-            setError(error.response.data.message || 'Some error occured');
+        } catch (err: unknown) {
+            console.error(err);
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Some error occurred');
+            } else {
+                setError('Some error occurred');
+            }
         }
     }
+
     async function handleRegister(): Promise<void> {
         try {
-            const res = await apiCall("/auth/signup", 'POST', { firstName, lastName, age, gender, about, skills, photoUrl: photoUrl || undefined, emailId, password });
+            const res = await apiCall("/auth/signup", 'POST', {
+                firstName,
+                lastName,
+                age,
+                gender,
+                about,
+                skills,
+                photoUrl: photoUrl || undefined,
+                emailId,
+                password,
+            });
             dispatch(addUser(res.data.data));
             navigate('/profile');
-        } catch (error) {
-            console.error(error);
-            setError(error.response.data.message || 'Some error occured');
+        } catch (err: unknown) {
+            console.error(err);
+            if (axios.isAxiosError(err)) {
+                setError(err.response?.data?.message || 'Some error occurred');
+            } else {
+                setError('Some error occurred');
+            }
         }
     }
 
     return (
-        <div className="flex items-center justify-center p-10">
-            <div className="card bg-neutral text-base-content w-[450px]">
-                <div className="card-body items-center justify-center">
-                    <h2 className="card-title">Login</h2>
-                    <div className="form-control">
-                        {!isLoginForm &&
-                            <>
-                                <div className="flex justify-center gap-10">
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">First Name</legend>
-                                        <input type="text" className="input w-full" placeholder="Enter your First Name"
-                                            value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                                    </fieldset>
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">Last Name</legend>
-                                        <input type="text" className="input w-full" placeholder="Enter your Last Name"
-                                            value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                                    </fieldset>
-                                </div>
-                                <div className="flex justify-center gap-4">
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">Age</legend>
-                                        <input
-                                            type="number"
-                                            className="input w-full"
-                                            placeholder="Enter your Age"
-                                            value={age}
-                                            onChange={(e) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
-                                        />
-                                    </fieldset>
-                                    <fieldset className="fieldset">
-                                        <legend className="fieldset-legend">Gender</legend>
-                                        <div className="flex gap-4 items-center justify-center my-2">
-                                            <label className="label cursor-pointer flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="gender"
-                                                    value="male"
-                                                    checked={gender.toLowerCase() === "male"}
-                                                    onChange={(e) => setGender(e.target.value)}
-                                                    className="radio radio-primary"
-                                                />
-                                                <span className="label-text">Male</span>
-                                            </label>
-                                            <label className="label cursor-pointer flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="gender"
-                                                    value="female"
-                                                    checked={gender.toLowerCase() === "female"}
-                                                    onChange={(e) => setGender(e.target.value)}
-                                                    className="radio radio-primary"
-                                                />
-                                                <span className="label-text">Female</span>
-                                            </label>
-                                            <label className="label cursor-pointer flex items-center gap-2">
-                                                <input
-                                                    type="radio"
-                                                    name="gender"
-                                                    value="other"
-                                                    checked={gender.toLowerCase() === "other"}
-                                                    onChange={(e) => setGender(e.target.value)}
-                                                    className="radio radio-primary"
-                                                />
-                                                <span className="label-text">Other</span>
-                                            </label>
-                                        </div>
-                                    </fieldset>
-                                </div>
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">About</legend>
-                                    <input type="text" className="input w-full" placeholder="Enter your About"
-                                        value={about} onChange={(e) => setAbout(e.target.value)} />
-                                </fieldset>
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">Skills</legend>
-                                    <input type="text" className="input w-full" placeholder="Enter your Skills"
-                                        value={skills} onChange={(e) => setSkills(e.target.value.split(','))} />
-                                </fieldset>
-                                <fieldset className="fieldset">
-                                    <legend className="fieldset-legend">Photo URL</legend>
-                                    <input type="text" className="input w-full" placeholder="Enter your Photo URL"
-                                        value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} />
-                                </fieldset>
-                            </>
-                        }
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Email ID</legend>
-                            <input type="email" className="input" placeholder="Enter your Email ID"
-                                value={emailId} onChange={(e) => setEmailId(e.target.value)} />
-                        </fieldset>
-                        <fieldset className="fieldset">
-                            <legend className="fieldset-legend">Password</legend>
-                            <input type="password" className="input" placeholder="Enter your Password"
-                                value={password} onChange={(e) => setPassword(e.target.value)} />
-                        </fieldset>
+        <div className="flex-1 flex items-center justify-center py-6 sm:py-10 px-4 w-full">
+            <div className="card bg-base-200/80 backdrop-blur-md border border-base-content/10 shadow-2xl rounded-3xl w-full max-w-lg p-6 sm:p-8">
+                {/* Brand Header */}
+                <div className="text-center mb-6">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center text-primary-content text-2xl shadow-lg shadow-primary/20 mx-auto mb-3">
+                        💻
                     </div>
-                    <p className="text-red-500">{error}</p>
-                    <div className="card-actions justify-end">
-                        <button className="btn btn-primary" onClick={isLoginForm ? handleLogin : handleRegister}>{isLoginForm ? "Login" : "Register"}</button>
-                    </div>
-                    <p className="text-center cursor-pointer" onClick={() => setIsLoginForm(!isLoginForm)}>{isLoginForm ? "Don't have an account? Register here" : "Already have an account? Login here"}</p>
+                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-base-content">
+                        {isLoginForm ? "Welcome Back" : "Create Account"}
+                    </h2>
+                    <p className="text-xs sm:text-sm text-base-content/60 mt-1">
+                        {isLoginForm
+                            ? "Sign in to access your developer feed & matches."
+                            : "Join CodeCollab to meet developers & build projects."}
+                    </p>
                 </div>
+
+                {/* Segmented Switcher */}
+                <div className="grid grid-cols-2 p-1.5 bg-base-300/80 rounded-2xl mb-6 border border-base-content/10">
+                    <button
+                        type="button"
+                        className={`py-2 text-sm font-semibold rounded-xl transition-all ${
+                            isLoginForm
+                                ? 'bg-primary text-primary-content shadow-md'
+                                : 'text-base-content/60 hover:text-base-content'
+                        }`}
+                        onClick={() => {
+                            setIsLoginForm(true);
+                            setError('');
+                        }}
+                    >
+                        Sign In
+                    </button>
+                    <button
+                        type="button"
+                        className={`py-2 text-sm font-semibold rounded-xl transition-all ${
+                            !isLoginForm
+                                ? 'bg-primary text-primary-content shadow-md'
+                                : 'text-base-content/60 hover:text-base-content'
+                        }`}
+                        onClick={() => {
+                            setIsLoginForm(false);
+                            setError('');
+                        }}
+                    >
+                        Register
+                    </button>
+                </div>
+
+                <form
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        if (isLoginForm) {
+                            handleLogin();
+                        } else {
+                            handleRegister();
+                        }
+                    }}
+                    className="flex flex-col gap-4"
+                >
+                    {!isLoginForm && (
+                        <>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend font-medium text-xs text-base-content/80">First Name</legend>
+                                    <input
+                                        type="text"
+                                        className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                                        placeholder="First name"
+                                        value={firstName}
+                                        onChange={(e) => setFirstName(e.target.value)}
+                                        required
+                                    />
+                                </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend font-medium text-xs text-base-content/80">Last Name</legend>
+                                    <input
+                                        type="text"
+                                        className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                                        placeholder="Last name"
+                                        value={lastName}
+                                        onChange={(e) => setLastName(e.target.value)}
+                                    />
+                                </fieldset>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend font-medium text-xs text-base-content/80">Age</legend>
+                                    <input
+                                        type="number"
+                                        className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                                        placeholder="e.g. 24"
+                                        value={age}
+                                        onChange={(e) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
+                                    />
+                                </fieldset>
+
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend font-medium text-xs text-base-content/80">Gender</legend>
+                                    <div className="grid grid-cols-3 gap-1.5 mt-0.5">
+                                        {(['male', 'female', 'other'] as const).map((opt) => (
+                                            <label
+                                                key={opt}
+                                                className={`flex items-center justify-center gap-1 py-2 px-1.5 rounded-xl text-xs font-semibold cursor-pointer border transition-all ${
+                                                    gender.toLowerCase() === opt
+                                                        ? 'bg-primary text-primary-content border-primary shadow-sm'
+                                                        : 'bg-base-300/50 border-base-content/10 text-base-content/70 hover:border-primary/40'
+                                                }`}
+                                            >
+                                                <input
+                                                    type="radio"
+                                                    name="registerGender"
+                                                    value={opt}
+                                                    checked={gender.toLowerCase() === opt}
+                                                    onChange={(e) => setGender(e.target.value)}
+                                                    className="hidden"
+                                                />
+                                                {opt.charAt(0).toUpperCase() + opt.slice(1)}
+                                            </label>
+                                        ))}
+                                    </div>
+                                </fieldset>
+                            </div>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend font-medium text-xs text-base-content/80">About</legend>
+                                <input
+                                    type="text"
+                                    className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                                    placeholder="Brief bio or what you are looking to build"
+                                    value={about}
+                                    onChange={(e) => setAbout(e.target.value)}
+                                />
+                            </fieldset>
+
+                            <fieldset className="fieldset">
+                                <div className="flex justify-between items-center w-full">
+                                    <legend className="fieldset-legend font-medium text-xs text-base-content/80">Skills</legend>
+                                    <span className="text-[11px] text-base-content/40">Comma-separated</span>
+                                </div>
+                                <input
+                                    type="text"
+                                    className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary font-mono text-sm"
+                                    placeholder="React, TypeScript, Node.js"
+                                    value={skills.join(', ')}
+                                    onChange={(e) => setSkills(e.target.value.split(',').map((s) => s.trim()))}
+                                />
+                            </fieldset>
+
+                            <fieldset className="fieldset">
+                                <legend className="fieldset-legend font-medium text-xs text-base-content/80">Photo URL (optional)</legend>
+                                <input
+                                    type="text"
+                                    className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary font-mono text-xs"
+                                    placeholder="Leave blank for default avatar"
+                                    value={photoUrl}
+                                    onChange={(e) => setPhotoUrl(e.target.value)}
+                                />
+                            </fieldset>
+                        </>
+                    )}
+
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend font-medium text-xs text-base-content/80">Email ID</legend>
+                        <input
+                            type="email"
+                            className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                            placeholder="you@example.com"
+                            value={emailId}
+                            onChange={(e) => setEmailId(e.target.value)}
+                            required
+                        />
+                    </fieldset>
+
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend font-medium text-xs text-base-content/80">Password</legend>
+                        <input
+                            type="password"
+                            className="input w-full rounded-xl bg-base-300/50 border-base-content/20 focus:border-primary"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                        />
+                    </fieldset>
+
+                    {error && (
+                        <div className="alert alert-error text-xs rounded-2xl py-2.5 mt-2">
+                            <span>{error}</span>
+                        </div>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="btn btn-primary w-full rounded-2xl py-3 mt-4 text-base font-bold shadow-lg shadow-primary/25 hover:shadow-primary/40 active:scale-[0.99] transition-all"
+                    >
+                        {isLoginForm ? "Sign In to CodeCollab" : "Create Account"}
+                    </button>
+
+                    <p
+                        className="text-center text-xs text-base-content/60 hover:text-primary cursor-pointer mt-3 transition-colors"
+                        onClick={() => {
+                            setIsLoginForm(!isLoginForm);
+                            setError('');
+                        }}
+                    >
+                        {isLoginForm
+                            ? "Don't have an account yet? Register here"
+                            : "Already have an account? Sign in here"}
+                    </p>
+                </form>
             </div>
         </div>
-    )
-}
+    );
+};

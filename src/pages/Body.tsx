@@ -34,9 +34,12 @@ export const Body = () => {
     }, [fetchUser]);
 
     return (
-        <div>
+        <div className="min-h-screen flex flex-col bg-base-100 text-base-content relative selection:bg-primary/20 selection:text-primary">
+            <div className="ambient-glow" />
             <Navbar />
-            <Outlet />
+            <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10 relative z-10 flex flex-col">
+                <Outlet />
+            </main>
             <Footer />
         </div>
     );
