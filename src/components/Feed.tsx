@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux"
 import { apiCall } from "../utils/api"
-import { setFeed } from "../utils/feedSlice"
+import { setFeed, updateFeed } from "../utils/feedSlice"
 import { useEffect } from "react"
 import type { RootState } from "../utils/appStore"
 import type { IFeed } from "../utils/types"
@@ -19,16 +19,23 @@ export const Feed = () => {
             console.log(error);
         }
     }
+    const handleSendRequest = async (toUserId: string, status: 'interested' | 'ignored') => {
+        try {
+            const res = await apiCall(`/requests/send/${status}/${toUserId}`, 'POST', {});
+            dispatch(updateFeed({ userId: toUserId }));
+            console.log(res);
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
     useEffect(() => {
         getFeed();
     }, []);
-
-    return feed && (
+    if (feed?.length === 0) return <p className="flex justify-center items-center mt-24">No new users found</p>
+    return feed?.length > 0 && (
         <div className="flex justify-center items-center mt-10">
-            {/* {feed.map((user) => {
-                return <UserCard user={user} key={user._id} />
-            })} */}
-            <UserCard user={feed[0]} />
+            <UserCard user={feed[0]} onSendRequest={handleSendRequest} />
         </div>
     )
 }
