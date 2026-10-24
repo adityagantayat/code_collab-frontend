@@ -1,4 +1,5 @@
 export interface IFeed {
+    _id: string,
     firstName: string,
     lastName: string,
     age?: number,
