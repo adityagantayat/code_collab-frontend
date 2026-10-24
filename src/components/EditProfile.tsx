@@ -55,70 +55,74 @@ export const EditProfile = ({ user }: { user: IFeed }) => {
         }
     }
     return (
-        <div className="flex items-center justify-center p-24">
+        <div className="flex items-center justify-center m-10">
             {!preview ? (
-                <div className="card bg-neutral text-base-content w-96">
+                <div className="card bg-neutral text-base-content w-96" >
                     <div className="card-body items-center text-center">
                         <h2 className="card-title">Edit Profile</h2>
                         <div className="form-control w-full">
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">First Name</legend>
-                                <input type="text" className="input w-full" placeholder="Enter your First Name"
-                                    value={firstName} onChange={(e) => setFirstName(e.target.value)} />
-                            </fieldset>
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Last Name</legend>
-                                <input type="text" className="input w-full" placeholder="Enter your Last Name"
-                                    value={lastName} onChange={(e) => setLastName(e.target.value)} />
-                            </fieldset>
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Age</legend>
-                                <input
-                                    type="number"
-                                    className="input w-full"
-                                    placeholder="Enter your Age"
-                                    value={age}
-                                    onChange={(e) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
-                                />
-                            </fieldset>
-                            <fieldset className="fieldset">
-                                <legend className="fieldset-legend">Gender</legend>
-                                <div className="flex gap-4 items-center justify-center my-2">
-                                    <label className="label cursor-pointer flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="male"
-                                            checked={gender.toLowerCase() === "male"}
-                                            onChange={(e) => setGender(e.target.value)}
-                                            className="radio radio-primary"
-                                        />
-                                        <span className="label-text">Male</span>
-                                    </label>
-                                    <label className="label cursor-pointer flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="female"
-                                            checked={gender.toLowerCase() === "female"}
-                                            onChange={(e) => setGender(e.target.value)}
-                                            className="radio radio-primary"
-                                        />
-                                        <span className="label-text">Female</span>
-                                    </label>
-                                    <label className="label cursor-pointer flex items-center gap-2">
-                                        <input
-                                            type="radio"
-                                            name="gender"
-                                            value="other"
-                                            checked={gender.toLowerCase() === "other"}
-                                            onChange={(e) => setGender(e.target.value)}
-                                            className="radio radio-primary"
-                                        />
-                                        <span className="label-text">Other</span>
-                                    </label>
-                                </div>
-                            </fieldset>
+                            <div className="flex justify-center gap-10">
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">First Name</legend>
+                                    <input type="text" className="input w-full" placeholder="Enter your First Name"
+                                        value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+                                </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Last Name</legend>
+                                    <input type="text" className="input w-full" placeholder="Enter your Last Name"
+                                        value={lastName} onChange={(e) => setLastName(e.target.value)} />
+                                </fieldset>
+                            </div>
+                            <div className="flex justify-center gap-4">
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Age</legend>
+                                    <input
+                                        type="number"
+                                        className="input w-full"
+                                        placeholder="Enter your Age"
+                                        value={age}
+                                        onChange={(e) => setAge(e.target.value === "" ? "" : Number(e.target.value))}
+                                    />
+                                </fieldset>
+                                <fieldset className="fieldset">
+                                    <legend className="fieldset-legend">Gender</legend>
+                                    <div className="flex gap-4 items-center justify-center my-2">
+                                        <label className="label cursor-pointer flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="male"
+                                                checked={gender.toLowerCase() === "male"}
+                                                onChange={(e) => setGender(e.target.value)}
+                                                className="radio radio-primary"
+                                            />
+                                            <span className="label-text">Male</span>
+                                        </label>
+                                        <label className="label cursor-pointer flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="female"
+                                                checked={gender.toLowerCase() === "female"}
+                                                onChange={(e) => setGender(e.target.value)}
+                                                className="radio radio-primary"
+                                            />
+                                            <span className="label-text">Female</span>
+                                        </label>
+                                        <label className="label cursor-pointer flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="gender"
+                                                value="other"
+                                                checked={gender.toLowerCase() === "other"}
+                                                onChange={(e) => setGender(e.target.value)}
+                                                className="radio radio-primary"
+                                            />
+                                            <span className="label-text">Other</span>
+                                        </label>
+                                    </div>
+                                </fieldset>
+                            </div>
                             <fieldset className="fieldset">
                                 <legend className="fieldset-legend">About</legend>
                                 <input type="text" className="input w-full" placeholder="Enter your About"
@@ -159,7 +163,7 @@ export const EditProfile = ({ user }: { user: IFeed }) => {
                 </div>
             ) : (
                 <div className="flex flex-col items-center gap-4">
-                    <UserCard user={{ firstName, lastName, age: age === "" ? undefined : Number(age), gender, about, skills, photoUrl }} showButtons={false} />
+                    <UserCard user={{ _id: user._id, firstName, lastName, age: age === "" ? undefined : Number(age), gender, about, skills, photoUrl }} showButtons={false} />
                     <button className="btn btn-ghost bg-info text-info-content hover:bg-info/80" onClick={() => setPreview(false)}>Back to Edit</button>
                 </div>
             )}
