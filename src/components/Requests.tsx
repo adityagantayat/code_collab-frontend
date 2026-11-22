@@ -5,6 +5,7 @@ import type { RootState } from "../utils/appStore";
 import { removeRequests, setRequests } from "../utils/requestsSlice";
 import { ConnectionCard } from "./ConnectionCard";
 import { Link } from "react-router-dom";
+import type { IRequest } from "../utils/types";
 
 export const Requests = () => {
     const dispatch = useDispatch();
@@ -48,7 +49,7 @@ export const Requests = () => {
 
             {requests?.length ? (
                 <div className="flex flex-col items-center gap-4 w-full">
-                    {requests.map((request) => {
+                    {requests.map((request: IRequest) => {
                         const user = request.fromUserId;
                         return (
                             <ConnectionCard

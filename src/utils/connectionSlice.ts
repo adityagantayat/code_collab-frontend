@@ -1,14 +1,20 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { IFeed } from "./types";
 
-const connectionSLice = createSlice({
+const initialState: IFeed[] | null = null as IFeed[] | null;
+
+const connectionSlice = createSlice({
     name: 'connections',
-    initialState: null,
+    initialState: initialState as IFeed[] | null,
     reducers: {
-        setConnections: (state, action) => action.payload,
+        setConnections: (_state, action: PayloadAction<IFeed[] | null>) => action.payload,
         removeConnections: () => null,
-        updateConnections: (state, action) => ({ ...state, ...action.payload })
+        updateConnections: (state, action: PayloadAction<IFeed>) => {
+            if (!state) return null;
+            return state.map((conn) => (conn._id === action.payload._id ? { ...conn, ...action.payload } : conn));
+        }
     }
-})
+});
 
-export const { setConnections, removeConnections, updateConnections } = connectionSLice.actions;
-export default connectionSLice.reducer;
+export const { setConnections, removeConnections, updateConnections } = connectionSlice.actions;
+export default connectionSlice.reducer;
