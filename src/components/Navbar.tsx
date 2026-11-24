@@ -1,18 +1,19 @@
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../utils/appStore";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiCall } from "../utils/api";
 import { removeUser } from "../utils/userSlice";
 
 export const Navbar = () => {
     const user = useSelector((store: RootState) => store.user);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     async function handleLogout(): Promise<void> {
         try {
             await apiCall('/auth/signout', 'POST');
             dispatch(removeUser());
-            window.location.href = '/login';
+            navigate('/login');
         } catch (error) {
             console.log(error);
         }
