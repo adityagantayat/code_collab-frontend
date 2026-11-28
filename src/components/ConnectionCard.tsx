@@ -1,14 +1,17 @@
+import { Link } from "react-router-dom";
 import type { IFeed } from "../utils/types";
 
 export const ConnectionCard = ({
     id,
     user,
     showButtons = false,
+    showChatButton = false,
     handleRequest,
 }: {
     id: string;
     user: IFeed;
-    showButtons: boolean;
+    showButtons?: boolean;
+    showChatButton?: boolean;
     handleRequest?: (requestId: string, status: string) => void;
 }) => {
     return (
@@ -77,6 +80,29 @@ export const ConnectionCard = ({
                         >
                             <span>✓</span> Accept
                         </button>
+                    </div>
+                )}
+
+                {showChatButton && (
+                    <div className="flex items-center justify-end gap-3 mt-3 pt-3 border-t border-base-content/10">
+                        <Link
+                            to={`/chat/${id}`}
+                            className="btn btn-sm btn-outline text-base-content border-base-content hover:bg-base-content hover:text-black hover:border-base-content rounded-full px-5 gap-1.5 transition-all duration-200 hover:scale-105 active:scale-95"
+                        >
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                                className="w-4 h-4"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M3.43 2.524A41.29 41.29 0 0 1 10 2c2.236 0 4.43.18 6.57.524 1.437.231 2.43 1.49 2.43 2.902v5.148c0 1.413-.993 2.67-2.43 2.902a41.102 41.102 0 0 1-3.55.414c-.28.02-.521.18-.643.413l-1.712 3.293a.75.75 0 0 1-1.33 0l-1.713-3.293a.783.783 0 0 0-.642-.413 41.108 41.108 0 0 1-3.55-.414C1.993 13.245 1 11.986 1 10.574V5.426c0-1.413.993-2.67 2.43-2.902Z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                            Chat
+                        </Link>
                     </div>
                 )}
             </div>

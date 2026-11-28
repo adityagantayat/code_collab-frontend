@@ -54,6 +54,7 @@ export const Connections = () => {
                             id={connection._id.toString()}
                             user={connection}
                             showButtons={false}
+                            showChatButton={true}
                         />
                     ))}
                 </div>
