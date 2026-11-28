@@ -1,39 +1,86 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type SubmitEvent } from "react";
 import { Link, useParams } from "react-router-dom";
 import { createSocketConnection } from "../utils/socket";
 import { useSelector } from "react-redux";
 import type { RootState } from "../utils/appStore";
+import { apiCall } from "../utils/api";
 
 interface Message {
-    id: number;
+    _id: string;
     text: string;
-    senderId: string;
-    name: string;
-    timestamp: string;
+    senderId: {
+        _id: string;
+        firstName: string;
+        photoUrl: string;
+    };
+    createdAt: string;
 }
+
+const DEFAULT_AVATAR =
+    "https://images.pexels.com/photos/32703420/pexels-photo-32703420.jpeg";
+
+const formatMessageTime = (dateStr: string) => {
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const isToday = date.toDateString() === new Date().toDateString();
+    const time = date.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+
+    if (isToday) return time;
+
+    const day = date.toLocaleDateString([], {
+        month: "short",
+        day: "numeric",
+    });
+    return `${day}, ${time}`;
+};
 
 export const Chat = () => {
     const { targetUserId } = useParams();
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
+    const [targetUserDetails, setTargetUserDetails] = useState<{ name: string, photoUrl: string } | null>(null);
     const user = useSelector((store: RootState) => store.user);
     const userId = user?._id;
+    const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages]);
+    useEffect(() => {
+        if (!targetUserId) return;
+        let isMounted = true;
+
+        const fetchChatMessages = async () => {
+            try {
+                const { data: { data } } = await apiCall(`/chat/${targetUserId}`, 'GET');
+                if (isMounted) {
+                    setMessages(data.chat.messages);
+                    setTargetUserDetails(data.targetUser);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
+        fetchChatMessages();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [targetUserId]);
     useEffect(() => {
         if (!userId) return;
         const socket = createSocketConnection();
         socket.emit("joinChat", { name: user?.firstName, userId, targetUserId })
-        socket.on('messageReceived', ({ name, text, senderId, timestamp }) => {
+        socket.on('messageReceived', (msg: Message) => {
             setMessages((prev) => [
                 ...prev,
                 {
-                    id: Date.now(),
-                    text,
-                    name,
-                    senderId,
-                    timestamp: new Date(timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                    }),
+                    ...msg
                 },
             ]);
         })
@@ -41,7 +88,7 @@ export const Chat = () => {
             socket.disconnect();
         }
     }, [userId, targetUserId])
-    const handleSend = (e: FormEvent) => {
+    const handleSend = (e: SubmitEvent<HTMLFormElement>) => {
         e.preventDefault();
         const trimmed = input.trim();
         if (!trimmed) return;
@@ -73,11 +120,39 @@ export const Chat = () => {
                     Connections
                 </Link>
 
-                <div className="flex items-center gap-2 min-w-0">
-                    <span className="w-2 h-2 rounded-full bg-success shrink-0" />
-                    <h1 className="text-sm sm:text-base font-bold tracking-tight text-base-content truncate font-mono">
-                        {targetUserId}
-                    </h1>
+                <div className="flex items-center gap-3 min-w-0">
+                    {targetUserDetails ? (
+                        <>
+                            <div className="relative shrink-0">
+                                <div className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-base-content/20 bg-base-300 shadow-sm">
+                                    <img
+                                        src={targetUserDetails.photoUrl || DEFAULT_AVATAR}
+                                        alt={targetUserDetails.name}
+                                        className="w-full h-full object-cover object-top"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).src = DEFAULT_AVATAR;
+                                        }}
+                                    />
+                                </div>
+                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-success ring-2 ring-base-300" />
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <h1 className="text-sm sm:text-base font-bold tracking-tight text-base-content truncate">
+                                    {targetUserDetails.name}
+                                </h1>
+                                <span className="text-[11px] text-base-content/50 leading-none">
+                                    Connected
+                                </span>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <span className="w-2 h-2 rounded-full bg-success shrink-0" />
+                            <h1 className="text-sm sm:text-base font-bold tracking-tight text-base-content truncate font-mono">
+                                {targetUserId}
+                            </h1>
+                        </>
+                    )}
                 </div>
 
                 <div className="w-20 hidden sm:block" />
@@ -98,25 +173,54 @@ export const Chat = () => {
                         </p>
                     </div>
                 ) : (
-                    messages.map((msg) => (
-                        <div
-                            key={msg.id}
-                            className={`chat ${msg.senderId === userId ? "chat-end" : "chat-start"}`}
-                        >
+                    messages.map((msg) => {
+                        const isMe = msg.senderId?._id === userId;
+                        const senderName =
+                            msg.senderId?.firstName ||
+                            (isMe ? user?.firstName : targetUserDetails?.name) ||
+                            "User";
+                        const senderPhoto =
+                            msg.senderId?.photoUrl ||
+                            (isMe ? user?.photoUrl : targetUserDetails?.photoUrl) ||
+                            DEFAULT_AVATAR;
+
+                        return (
                             <div
-                                className={`chat-bubble text-sm leading-relaxed shadow-sm ${msg.senderId === userId
-                                    ? "bg-base-content/70 text-black"
-                                    : "bg-base-300/90 text-base-content border border-base-content/10"
-                                    }`}
+                                key={msg._id}
+                                className={`chat ${isMe ? "chat-end" : "chat-start"}`}
                             >
-                                {msg.text}
+                                <div className="chat-image avatar">
+                                    <div className="w-8 h-8 rounded-full overflow-hidden ring-1 ring-base-content/20 bg-base-300 shadow-sm">
+                                        <img
+                                            src={senderPhoto}
+                                            alt={senderName}
+                                            className="w-full h-full object-cover object-top"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = DEFAULT_AVATAR;
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+                                <div className="chat-header text-[11px] font-medium text-base-content/60 mb-1">
+                                    {senderName}
+                                </div>
+                                <div
+                                    className={`chat-bubble text-sm leading-relaxed shadow-sm ${
+                                        isMe
+                                            ? "bg-base-content/85 text-black"
+                                            : "bg-base-300/90 text-base-content border border-base-content/10"
+                                    }`}
+                                >
+                                    {msg.text}
+                                </div>
+                                <div className="chat-footer opacity-40 text-[11px] mt-1">
+                                    {formatMessageTime(msg.createdAt)}
+                                </div>
                             </div>
-                            <div className="chat-footer opacity-40 text-[11px] mt-1">
-                                {msg.timestamp}
-                            </div>
-                        </div>
-                    ))
+                        );
+                    })
                 )}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Message Input */}
