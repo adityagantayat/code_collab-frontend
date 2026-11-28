@@ -15,6 +15,7 @@
   - [3. Profile Editing & Live Preview](#3-profile-editing--live-preview)
   - [4. Connections & Connection Requests](#4-connections--connection-requests)
   - [5. Centralized API Client](#5-centralized-api-client)
+  - [6. Real-Time Chat](#6-real-time-chat)
 - [State Management (Redux Store)](#state-management-redux-store)
 - [Directory Structure](#directory-structure)
 - [Getting Started](#getting-started)
@@ -24,7 +25,7 @@
 
 ## Overview
 
-`code_collab-frontend` is the web client for Code Collab. It allows software developers to discover other engineers, view profiles, send and review connection requests, and manage their personal technical portfolios.
+`code_collab-frontend` is the web client for Code Collab. It allows software developers to discover other engineers, view profiles, send and review connection requests, chat in real time with matched connections, and manage their personal technical portfolios.
 
 The application connects to `code_collab-backend` (`http://localhost:3000`) and uses HTTP-only cookie-based authentication for secure session management.
 
@@ -41,6 +42,7 @@ The application connects to `code_collab-backend` (`http://localhost:3000`) and 
 | **State Management** | Redux Toolkit & React-Redux | ^2.13.0 / ^9.3.0 | Centralized store with slice reducers |
 | **Styling** | Tailwind CSS & DaisyUI | ^4.3.3 / ^5.7.50 | Utility-first CSS with dark-mode UI components |
 | **HTTP Client** | Axios | ^1.20.0 | Promise-based HTTP client with credentials |
+| **Real-Time** | Socket.IO Client | ^4.8.4 | WebSocket client for live 1-on-1 chat |
 | **Linting** | ESLint | ^10.13.0 | Flat config with React Hooks & TS plugins |
 
 ---
@@ -50,7 +52,7 @@ The application connects to `code_collab-backend` (`http://localhost:3000`) and 
 The app follows a modular component-driven architecture:
 
 * **Layout & Guard (`Body.tsx`)**: Wraps primary views, provides sticky navigation and footer, and performs on-mount session hydration (`/profile/view`).
-* **Feature Components (`src/components/`)**: Self-contained UI components with local state and Redux dispatchers (`Feed`, `UserCard`, `EditProfile`, `Connections`, `ConnectionCard`, `Requests`).
+* **Feature Components (`src/components/`)**: Self-contained UI components with local state and Redux dispatchers (`Feed`, `UserCard`, `EditProfile`, `Connections`, `ConnectionCard`, `Requests`, `Chat`).
 * **Central Utilities (`src/utils/`)**: Shared types, Redux slices, and the Axios network wrapper.
 
 ---
@@ -84,6 +86,10 @@ The app follows a modular component-driven architecture:
 * Supports both uppercase and lowercase HTTP methods (`GET`, `POST`, `PUT`, `PATCH`, `DELETE`).
 * Automatically type-checks and re-throws errors so UI components can handle status codes.
 
+### 6. Real-Time Chat
+* **Chat Navigation (`ConnectionCard.tsx`)**: Each accepted connection card includes a **Chat** button routing to `/chat/:targetUserId`.
+* **Chat Portal (`Chat.tsx` & `src/utils/socket.ts`)**: Loads persisted chat history via `GET /chat/:targetUserId`, connects via `socket.io-client` (`joinChat`, `sendMessage`, `messageReceived`), displays target user avatar/name in the header, sender avatars/names on bubbles, human-readable timestamps, and auto-scrolls to the newest message.
+
 ---
 
 ## State Management (Redux Store)
@@ -104,6 +110,7 @@ The global store (`src/utils/appStore.ts`) combines four domain slices:
 ```
 src/
 ├── components/
+│   ├── Chat.tsx            # Real-time 1-on-1 chat portal with Socket.IO & history
 │   ├── ConnectionCard.tsx  # Reusable horizontal card for connections & requests
 │   ├── Connections.tsx     # Accepted connections screen
 │   ├── EditProfile.tsx     # Profile editor with dirty state & live preview
@@ -122,6 +129,7 @@ src/
 │   ├── connectionSlice.ts  # Redux slice for accepted connections
 │   ├── feedSlice.ts        # Redux slice for user feed
 │   ├── requestsSlice.ts    # Redux slice for connection requests
+│   ├── socket.ts           # Socket.IO client connection helper
 │   ├── types.ts            # TypeScript interfaces (IFeed, User, etc.)
 │   └── userSlice.ts        # Redux slice for authenticated user
 ├── App.css
